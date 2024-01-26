@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# This is a loop that prints  statement indefinitely
 
 while true; do
     echo "To infinity and beyond"
