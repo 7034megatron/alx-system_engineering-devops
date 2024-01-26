@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# This script performs various actions based on signals and manages a PID file
+
+pid_file="/var/run/myscript.pid"
+
+# Function to clean up and exit
+cleanup_and_exit() {
+    echo "Cleaning up and exiting..."
+    rm -f "$pid_file"
+    exit
+}
+
+# Function to handle SIGTERM signal
+sigterm_handler() {
+    echo "I hate the kill command"
+}
+
+# Function to handle SIGINT signal
+sigint_handler() {
+    echo "Y U no love me?!"
+}
+
+# Register cleanup_and_exit function for SIGQUIT and SIGTERM signals
+trap cleanup_and_exit SIGQUIT SIGTERM
+
+# Register sigterm_handler function for SIGTERM signal
+trap sigterm_handler SIGTERM
+
+# Register sigint_handler function for SIGINT signal
+trap sigint_handler SIGINT
+
+# Create the PID file
+echo "$$" > "$pid_file"
+
+# Display message indefinitely
+while true; do
+    echo "To infinity and beyond"
+    sleep 2
+done
