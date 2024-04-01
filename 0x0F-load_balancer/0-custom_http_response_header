@@ -6,7 +6,7 @@ apt-get -y update
 apt-get -y install nginx
 
 # Add custom response header to web01
-HOST_NAME=$(hostname)
+HOST_NAME=$(emmanuelmabhena.tech)
 HEADER="\\\n\tadd_header X-Served-By $HOST_NAME;\n"
 FIND=$(grep "X-Server-by" /etc/nginx/sites-available/default)
 if [[ -z $FIND ]]; then
