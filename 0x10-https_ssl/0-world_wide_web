@@ -1,29 +1,30 @@
 #!/usr/bin/env bash
+# script to report information about server domains
+# shellcheck disable=SC2086
+check_domain() {
+	# awk will use record seperator of space
+	# space sperated list of sub domains
+	SUBDOMAINS='www lb-01 web-01 web-02'
 
-# Function to display information about a subdomain
-domain_information() {
-    local domain="$1"
-    local subdomain="$2"
-    local record_type
-    local destination
-    local answer_section
-
-    answer_section=$(dig +short "$subdomain.$domain" | grep -A1 'ANSWER SECTION:')
-    record_type=$(echo "$answer_section" | grep -oP '\b[A-Z]+\b' | tail -1)
-    destination=$(echo "$answer_section" | grep -oP '\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b')
-
-    echo "The subdomain $subdomain is a $record_type record and points to $destination"
+	if [ -z "$1" ]; then
+		exit
+	fi
+	# no sub domain specified, do all
+	if [ -z "$2" ]; then
+		echo "$SUBDOMAINS" | awk -v domain="$1"\
+		'BEGIN { RS=" " }
+		{split($0,ARR," ");
+		cmd = "dig " ARR[1]"."domain " | grep -A1 \"ANSWER SECTION:\" | tail -n1";
+		system(cmd)
+		close(cmd)}' | awk\
+		'{
+		split($0, DOMS, ".");
+		print "The subdomain " DOMS[1] " is a " $4 " record and points to " $5}'
+	else
+		dig "$2.$1" | grep -A1 "ANSWER SECTION:" | tail -n1 | awk\
+		'{
+		split($0, DOMS, ".");
+		print "The subdomain " DOMS[1] " is a " $4 " record and points to " $5}'
+	fi
 }
-
-# Main part
-if [ "$#" -eq 1 ]; then
-    domain_information "$1" "www"
-    domain_information "$1" "lb-01"
-    domain_information "$1" "web-01"
-    domain_information "$1" "web-02"
-elif [ "$#" -eq 2 ]; then
-    domain_information "$1" "$2"
-else
-    echo "Usage: $0 <domain> [<subdomain>]"
-    exit 1
-fi
+check_domain "$1" "$2"
