@@ -1,4 +1,21 @@
+<<<<<<< HEAD
 ufw allow 80/tcp
 ufw allow 443/tcp
 ufw allow 22/tcp
 ufw enable
+=======
+# Install ufw if not already installed
+sudo apt update
+sudo apt install ufw
+
+# Enable ufw
+sudo ufw enable
+
+# Allow incoming traffic on SSH, HTTP, and HTTPS ports
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# Deny all other incoming traffic
+sudo ufw default deny
+>>>>>>> 6a9ff395caaa74d245bafe60029e68c923de2486
