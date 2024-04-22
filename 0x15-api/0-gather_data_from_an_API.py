@@ -1,37 +1,46 @@
 #!/usr/bin/python3
-
 """
-Python script that, using a REST API, for a given employee ID,
-returns information about his/her TODO list progress.
+For a given employee ID, returns information about their TODO list progress
 """
 
-from requests import get
-from sys import argv
+import requests
+import sys
 
+def get_employee_todo_progress(employee_id):
+    # Make API request to get user data
+    user = requests.get(f"https://jsonplaceholder.typicode.com/users/{employee_id}")
+    if user.status_code != 200:
+        print("Error: Unable to fetch user data")
+        return
+    
+    name = user.json().get('name')
+
+    # Make API request to get TODO list data
+    todos = requests.get('https://jsonplaceholder.typicode.com/todos')
+    if todos.status_code != 200:
+        print("Error: Unable to fetch TODO list data")
+        return
+    
+    total_tasks = 0
+    completed = 0
+    completed_tasks_titles = []
+
+    for task in todos.json():
+        if task.get('userId') == int(employee_id):
+            total_tasks += 1
+            if task.get('completed'):
+                completed += 1
+                completed_tasks_titles.append(task.get('title'))
+
+    print('Employee {} is done with tasks({}/{}):'
+          .format(name, completed, total_tasks))
+
+    print('\n'.join(["\t " + title for title in completed_tasks_titles]))
 
 if __name__ == "__main__":
-    response = get('https://jsonplaceholder.typicode.com/todos/')
-    data = response.json()
-    completed = 0
-    total = 0
-    tasks = []
-    response2 = get('https://jsonplaceholder.typicode.com/users')
-    data2 = response2.json()
-
-    for i in data2:
-        if i.get('id') == int(argv[1]):
-            employee = i.get('name')
-
-    for i in data:
-        if i.get('userId') == int(argv[1]):
-            total += 1
-
-            if i.get('completed') is True:
-                completed += 1
-                tasks.append(i.get('title'))
-
-    print("Employee {} is done with tasks({}/{}):".format(employee, completed,
-                                                          total))
-
-    for i in tasks:
-        print("\t {}".format(i))
+    if len(sys.argv) != 2:
+        print("Usage: python3 script.py <employee_id>")
+        sys.exit(1)
+        
+    employee_id = sys.argv[1]
+    get_employee_todo_progress(employee_id)
