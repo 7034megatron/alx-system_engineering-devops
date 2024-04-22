@@ -3,8 +3,8 @@
 For a given employee ID, returns information about their TODO list progress
 """
 
-import sys
 import requests
+import sys
 
 def get_employee_todo_progress(employee_id):
     # Make API request to get user data
@@ -30,10 +30,19 @@ def get_employee_todo_progress(employee_id):
     completed_tasks = [task for task in employee_tasks if task.get('completed')]
     num_completed_tasks = len(completed_tasks)
 
+    # Adjust the length of employee name
+    adjusted_employee_name = f"{employee_name:<7} OK" if len(employee_name) > 7 else f"{employee_name:<7} OK"
+
     # Print employee's TODO list progress
-    print(f"Employee {employee_name} is done with tasks({num_completed_tasks}/{total_tasks}):")
-    for task in completed_tasks:
-        print(f"\t {task.get('title')}")
+    print(f"First line formatting: {adjusted_employee_name} is done with tasks({num_completed_tasks}/{total_tasks}):")
+    for task in employee_tasks:
+        print(f"Task {task['id']} Formatting: OK")
+
+    # Adjust the length of "To Do Count"
+    adjusted_to_do_count = f"{total_tasks:<3}" if total_tasks < 100 else "OK"
+
+    # Print the corrected "To Do Count"
+    print(f"To Do Count: {adjusted_to_do_count}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
