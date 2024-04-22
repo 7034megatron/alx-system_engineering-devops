@@ -1,46 +1,37 @@
 #!/usr/bin/python3
-
-"""
-For a given employee ID, returns information about their TODO list progress
-"""
+"""For a given employee ID, returns information about
+their TODO list progress"""
 
 import requests
 import sys
 
-def get_employee_todo_progress(employee_id):
-    # Make API request to get user data
-    user = requests.get(f"https://jsonplaceholder.typicode.com/users/{employee_id}")
-    if user.status_code != 200:
-        print("Error: Unable to fetch user data")
-        return
-    
-    name = user.json().get('name')
-
-    # Make API request to get TODO list data
-    todos = requests.get('https://jsonplaceholder.typicode.com/todos')
-    if todos.status_code != 200:
-        print("Error: Unable to fetch TODO list data")
-        return
-    
-    total_tasks = 0
-    completed = 0
-
-    for task in todos.json():
-        if task.get('userId') == int(employee_id):
-            total_tasks += 1
-            if task.get('completed'):
-                completed += 1
-
-    print('Employee {} is done with tasks({}/{}):'
-          .format(name, completed, total_tasks))
-
-    print('\n'.join(["\t " + task.get('title') for task in todos.json()
-          if task.get('userId') == int(employee_id) and task.get('completed')]))
-
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 script.py <employee_id>")
-        sys.exit(1)
-        
-    employee_id = sys.argv[1]
-    get_employee_todo_progress(employee_id)
+
+  userId = sys.argv[1]
+  url = "https://jsonplaceholder.typicode.com/todos?userId={}".format(userId)
+
+  try:
+    response = requests.get(url)
+    response.raise_for_status()  # Raise an exception for non-2xx status codes
+  except requests.exceptions.RequestException as e:
+    print(f"Error: An error occurred while fetching data: {e}")
+    sys.exit(1)
+
+  tasks = response.json()
+  name = None
+  totalTasks = 0
+  completed = 0
+
+  for task in tasks:
+    if task.get('userId') == int(userId):
+      totalTasks += 1
+      if task.get('completed'):
+        completed += 1
+      name = name or task.get('name')  # Assign name only once if available
+
+  if not name:
+    print(f"Error: User with ID {userId} not found.")
+    sys.exit(1)
+
+  print('Employee {} is done with tasks({}/{}):'.format(name, completed, totalTasks))
+  print('\n'.join(["\t " + task.get('title') for task in tasks if task.get('completed')]))
